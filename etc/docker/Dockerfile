@@ -28,23 +28,81 @@
 FROM ubuntu
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV PLATFORM ubuntu
+
+COPY . /app
+WORKDIR /app
+
 ENV RELEASE 1
 ENV NAT64 1
 ENV DNS64 1
+ENV DHCPV6_PD 0
+ENV NETWORK_MANAGER 0
 
-COPY . /app
+ENV OTBR_BUILD_DEPS \
+    git \
+    wget \
+    apt-utils \
+    build-essential \
+    libtool \
+    automake \
+    libdbus-1-dev \
+    autoconf-archive \
+    libavahi-common-dev \
+    libavahi-client-dev \
+    ctags \
+    libboost-dev \
+    libboost-filesystem-dev \
+    libboost-system-dev \
+    libjsoncpp-dev
 
-WORKDIR /app
+ENV OTBR_REQS \
+        sudo \
+        rsyslog \
+        avahi-daemon \
+        iproute2 \
+        iputils-ping
 
-RUN apt-get update && apt-get install -y git lsb-core sudo
+ENV OTBR_NORELEASE_DEPS \
+    cmake \
+    doxygen \
+    cpputest
 
-RUN git reset --hard && git clean -xffd
-RUN ./script/bootstrap && ./script/setup
-RUN chmod 644 /etc/bind/named.conf.options
-RUN mv ./script /tmp && mv ./etc /tmp
-RUN find . -delete && rm -rf /usr/include
-RUN mv /tmp/script . && mv /tmp/etc .
-RUN apt-get autoremove -y -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 && rm -rf /var/lib/apt/lists/*
+ENV OTBR_NAT64_REQS \
+    tayga \
+    iptables
+
+ENV OTBR_DNS64_REQS \
+    bind9
+
+ENV OTBR_NETWORK_MANAGER_REQS \
+    network-manager
+
+ENV OTBR_DHCP6_PD_REQS \
+    dhcpcd5
+
+RUN set -xe; \
+    apt-get update; \
+    apt-get install -y $OTBR_REQS; \
+    apt-get install -y $OTBR_BUILD_DEPS; \
+    if [ "${RELEASE}" = "0" ]; then apt-get install -y $OTBR_NORELEASE_DEPS; fi; \
+    if [ "${NAT64}" = "1" ]; then apt-get install -y $OTBR_NAT64_REQS; fi; \
+    if [ "${DNS64}" = "1" ]; then apt-get install -y $OTBR_DNS64_REQS; fi; \
+    if [ "${NETWORK_MANAGER}" = "1" ]; then apt-get install -y $OTBR_NETWORK_MANAGER_REQS; fi; \
+    if [ "${DHCPV6_PD}" = "1" ]; then apt-get install -y $OTBR_DHCP6_PD_REQS; fi; \
+    git submodule update --init --recursive || true; \
+    ./bootstrap; \
+    ./script/setup; \
+    chmod 644 /etc/bind/named.conf.options; \
+    mv ./script /tmp; \
+    mv ./etc /tmp; \
+    find . -delete; \
+    rm -rf /usr/include; \
+    mv /tmp/script .; \
+    mv /tmp/etc .; \
+    apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_BUILD_DEPS; \
+    if [ "${RELEASE}" = "0" ]; then apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $OTBR_NORELEASE_DEPS; fi; \
+    rm -rf /var/lib/apt/lists/*;
 
 ENTRYPOINT ["/app/etc/docker/docker_entrypoint.sh"]
 
