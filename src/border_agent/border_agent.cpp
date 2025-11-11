@@ -328,6 +328,11 @@ exit:
 void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
 {
     Mdns::Publisher::TxtList txtList;
+#if OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
+    std::string vendorName;
+    std::string productName;
+    bool        runtimeUpdate = false;
+#endif
 
     if (!mVendorOui.empty())
     {
@@ -357,6 +362,20 @@ void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
                 txtEntry.mValue              = value;
                 txtEntry.mIsBooleanAttribute = false;
                 found                        = true;
+
+#if OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
+                if (txtEntry.mKey == "vn")
+                {
+                    vendorName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
+                    runtimeUpdate = true;
+                }
+
+                if (txtEntry.mKey == "mn")
+                {
+                    productName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
+                    runtimeUpdate = true;
+                }
+#endif
                 break;
             }
         }
@@ -366,6 +385,13 @@ void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
             txtList.emplace_back(key.c_str(), value.data(), value.size());
         }
     }
+
+#if OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
+    if (runtimeUpdate)
+    {
+        mBaseServiceInstanceName = vendorName + " " + productName;
+    }
+#endif
 
     mVendorTxtData.clear();
 
