@@ -65,6 +65,8 @@ set(OT_NAT64_BORDER_ROUTING ${OTBR_NAT64} CACHE STRING "enable NAT64 in border r
 set(OT_NAT64_TRANSLATOR ${OTBR_NAT64} CACHE STRING "enable NAT64 translator" FORCE)
 set(OT_NETDATA_PUBLISHER ON CACHE STRING "enable netdata publisher" FORCE)
 set(OT_NETDIAG_CLIENT ON CACHE STRING "enable Network Diagnostic client" FORCE)
+set(OT_NETDIAG_VENDOR_INFO ON CACHE STRING "Allow setting vendor info at runtime" FORCE)
+set(OT_BORDER_AGENT_TXT_DATA_PARSER ON CACHE STRING "border agent TXT data parser" FORCE)
 set(OT_PLATFORM "posix" CACHE STRING "use posix platform" FORCE)
 set(OT_PLATFORM_NETIF ON CACHE STRING "enable platform netif" FORCE)
 set(OT_PLATFORM_UDP ON CACHE STRING "enable platform UDP" FORCE)

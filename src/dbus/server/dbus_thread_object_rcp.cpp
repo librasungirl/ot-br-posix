@@ -1348,8 +1348,7 @@ void DBusThreadObjectRcp::UpdateMeshCopTxtHandler(DBusRequest &aRequest)
     if (update.count("id"))
     {
         otBorderAgentId id;
-        const auto     &idVec    = update.at("id");
-        otInstance     *instance = mHost.GetInstance();
+        const auto     &idVec = update.at("id");
 
         VerifyOrExit(idVec.size() == sizeof(id.mId), error = OT_ERROR_INVALID_ARGS);
         memcpy(id.mId, idVec.data(), sizeof(id.mId));
