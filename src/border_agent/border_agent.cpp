@@ -367,6 +367,31 @@ void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
         }
     }
 
+    {
+        std::string vendorName;
+        std::string productName;
+
+        for (const auto &entry : txtList)
+        {
+            if (entry.mKey == "vn")
+            {
+                vendorName.assign(reinterpret_cast<const char *>(entry.mValue.data()), entry.mValue.size());
+                otThreadSetVendorName(mHost.GetInstance(), vendorName.c_str());
+            }
+            else if (entry.mKey == "mn")
+            {
+                productName.assign(reinterpret_cast<const char *>(entry.mValue.data()), entry.mValue.size());
+                otThreadSetVendorModel(mHost.GetInstance(), modelName.c_str());
+            }
+        }
+
+        mBaseServiceInstanceName = vendorName + " " + productName;
+
+#if !OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
+        otBorderAgentSetMeshCoPServiceBaseName(mHost.GetInstance(), mBaseServiceInstanceName.c_str());
+#endif
+    }
+
     mVendorTxtData.clear();
 
     if (!txtList.empty())
