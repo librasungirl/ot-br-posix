@@ -1334,6 +1334,24 @@ void DBusThreadObjectRcp::UpdateMeshCopTxtHandler(DBusRequest &aRequest)
     {
         update[entry.mKey] = entry.mValue;
     }
+
+#if !OTBR_BORDER_AGENT_MESHCOP_SERVICE
+    // In this case, `OPENTHREAD_CONFIG_BORDER_AGENT_MESHCOP_SERVICE_ENABLE`
+    // will be true. `id` will be stored into persistent storage and Border
+    // Agent in OT core manages registering/updating of the mDNS MeshCoP
+    // service(s) on the infrastructure link.
+    if (update.count("id"))
+    {
+        otBorderAgentId id;
+        const auto     &idVec = update.at("id");
+
+        VerifyOrExit(idVec.size() == sizeof(id.mId), error = OT_ERROR_INVALID_ARGS);
+        memcpy(id.mId, idVec.data(), sizeof(id.mId));
+        SuccessOrExit(error = otBorderAgentSetId(mHost.GetInstance(), &id));
+        update.erase("id");
+    }
+#endif // !OTBR_BORDER_AGENT_MESHCOP_SERVICE
+
     for (const auto reservedKey : {"rv", "tv", "sb", "nn", "xp", "at", "pt", "dn", "sq", "bb", "omr"})
     {
         VerifyOrExit(!update.count(reservedKey), error = OT_ERROR_INVALID_ARGS);
