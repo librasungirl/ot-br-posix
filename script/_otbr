@@ -87,7 +87,8 @@ otbr_install()
     # If the user provided custom options, append them
     if [[ -n ${OTBR_OPTIONS:-} ]]; then
         local user_options=()
-        read -r -a user_options <<<"${OTBR_OPTIONS}"
+        eval "user_options=(${OTBR_OPTIONS})"
+
         otbr_options+=("${user_options[@]}")
     fi
 

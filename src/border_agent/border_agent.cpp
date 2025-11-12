@@ -312,15 +312,15 @@ void BorderAgent::HandleBorderAgentMeshCoPServiceChanged(bool aIsActive, uint16_
 
         for (auto &entry : txtList)
         {
-            if (txtEntry.mKey == "vn")
+            if (entry.mKey == "vn")
             {
-                vendorName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
+                vendorName.assign(reinterpret_cast<const char *>(entry.mValue.data()), entry.mValue.size());
                 runtimeUpdate = true;
             }
 
-            if (txtEntry.mKey == "mn")
+            if (entry.mKey == "mn")
             {
-                modelName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
+                modelName.assign(reinterpret_cast<const char *>(entry.mValue.data()), entry.mValue.size());
                 runtimeUpdate = true;
             }
 
