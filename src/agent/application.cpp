@@ -298,10 +298,9 @@ void Application::InitRcpMode(const std::string &aRestListenAddress, int aRestLi
         mBorderAgent.HandleEpskcStateChanged(aEpskcState, aPort);
     });
     SetBorderAgentOnInitState();
-#else
+#endif
     mBorderAgent.SetVendorTxtDataChangedCallback(
         [this](const BorderAgent::TxtData &aVendorTxtData) { mHost.SetBorderAgentVendorTxtData(aVendorTxtData); });
-#endif
 #endif // OTBR_ENABLE_BORDER_AGENT
 #if OTBR_ENABLE_BACKBONE_ROUTER
     mBackboneAgent->Init();

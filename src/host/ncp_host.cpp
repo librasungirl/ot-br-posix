@@ -329,7 +329,7 @@ void NcpHost::AddEphemeralKeyStateChangedCallback(EphemeralKeyStateChangedCallba
     mNcpSpinel.AddEphemeralKeyStateChangedCallback(aCallback);
 }
 
-#if OTBR_ENABLE_BORDER_AGENT && !OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
+#if OTBR_ENABLE_BORDER_AGENT
 void NcpHost::SetBorderAgentVendorTxtData(const std::vector<uint8_t> &aVendorTxtData)
 {
     // To be implemented

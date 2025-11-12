@@ -221,7 +221,7 @@ public:
     void SetBorderAgentMeshCoPServiceChangedCallback(BorderAgentMeshCoPServiceChangedCallback aCallback) override;
     void AddEphemeralKeyStateChangedCallback(EphemeralKeyStateChangedCallback aCallback) override;
     void SetUdpForwardToHostCallback(UdpForwardToHostCallback aCallback) override;
-#if OTBR_ENABLE_BORDER_AGENT && !OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
+#if OTBR_ENABLE_BORDER_AGENT
     void SetBorderAgentVendorTxtData(const std::vector<uint8_t> &aVendorTxtData) override;
 #endif
 

@@ -901,7 +901,7 @@ void RcpHost::AddEphemeralKeyStateChangedCallback(EphemeralKeyStateChangedCallba
     mEphemeralKeyStateChangedCallbacks.push_back(aCallback);
 }
 
-#if OTBR_ENABLE_BORDER_AGENT && !OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
+#if OTBR_ENABLE_BORDER_AGENT
 void RcpHost::SetBorderAgentVendorTxtData(const std::vector<uint8_t> &aVendorTxtData)
 {
     VerifyOrExit(mInstance != nullptr);

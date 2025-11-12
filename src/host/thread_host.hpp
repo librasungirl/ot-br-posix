@@ -291,7 +291,7 @@ public:
      */
     virtual void AddEphemeralKeyStateChangedCallback(EphemeralKeyStateChangedCallback aCallback) = 0;
 
-#if OTBR_ENABLE_BORDER_AGENT && !OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
+#if OTBR_ENABLE_BORDER_AGENT
     /**
      * This method sets or updates the Border Agent Vendor TXT Data.
      *

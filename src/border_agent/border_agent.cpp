@@ -289,6 +289,10 @@ exit:
 
 void BorderAgent::HandleBorderAgentMeshCoPServiceChanged(bool aIsActive, uint16_t aPort, const TxtData &aOtTxtData)
 {
+    std::string vendorName;
+    std::string productName;
+    bool        runtimeUpdate = false;
+
     if (aIsActive != mBaIsActive || aPort != mMeshCoPUdpPort)
     {
         mBaIsActive     = aIsActive;
@@ -308,6 +312,18 @@ void BorderAgent::HandleBorderAgentMeshCoPServiceChanged(bool aIsActive, uint16_
 
         for (auto &entry : txtList)
         {
+            if (txtEntry.mKey == "vn")
+            {
+                vendorName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
+                runtimeUpdate = true;
+            }
+
+            if (txtEntry.mKey == "mn")
+            {
+                productName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
+                runtimeUpdate = true;
+            }
+
             if (entry.mKey == "xa")
             {
                 memcpy(mExtAddress.m8, entry.mValue.data(), sizeof(mExtAddress.m8));
@@ -316,6 +332,11 @@ void BorderAgent::HandleBorderAgentMeshCoPServiceChanged(bool aIsActive, uint16_
                 mIsInitialized       = true;
                 break;
             }
+        }
+
+        if (runtimeUpdate)
+        {
+            mBaseServiceInstanceName = vendorName + " " + productName;
         }
     }
 
@@ -328,11 +349,7 @@ exit:
 void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
 {
     Mdns::Publisher::TxtList txtList;
-#if OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
-    std::string vendorName;
-    std::string productName;
-    bool        runtimeUpdate = false;
-#endif
+    TxtData                  vendorTxtData; // Encoded vendor-specific TXT data.
 
     if (!mVendorOui.empty())
     {
@@ -362,20 +379,6 @@ void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
                 txtEntry.mValue              = value;
                 txtEntry.mIsBooleanAttribute = false;
                 found                        = true;
-
-#if OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
-                if (txtEntry.mKey == "vn")
-                {
-                    vendorName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
-                    runtimeUpdate = true;
-                }
-
-                if (txtEntry.mKey == "mn")
-                {
-                    productName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
-                    runtimeUpdate = true;
-                }
-#endif
                 break;
             }
         }
@@ -386,36 +389,29 @@ void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
         }
     }
 
-#if OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE
-    if (runtimeUpdate)
-    {
-        mBaseServiceInstanceName = vendorName + " " + productName;
-    }
-#endif
-
-    mVendorTxtData.clear();
+    vendorTxtData.clear();
 
     if (!txtList.empty())
     {
-        otbrError error = Mdns::Publisher::EncodeTxtData(txtList, mVendorTxtData);
+        otbrError error = Mdns::Publisher::EncodeTxtData(txtList, vendorTxtData);
 
         assert(error == OTBR_ERROR_NONE);
         OTBR_UNUSED_VARIABLE(error);
     }
 
-    if (mVendorTxtDataChangedCallback != nullptr)
+    if (vendorTxtDataChangedCallback != nullptr)
     {
-        mVendorTxtDataChangedCallback(mVendorTxtData);
+        vendorTxtDataChangedCallback(vendorTxtData);
     }
 }
 
 void BorderAgent::SetVendorTxtDataChangedCallback(VendorTxtDataChangedCallback aCallback)
 {
-    mVendorTxtDataChangedCallback = aCallback;
+    vendorTxtDataChangedCallback = aCallback;
 
-    if (mVendorTxtDataChangedCallback != nullptr)
+    if (vendorTxtDataChangedCallback != nullptr)
     {
-        mVendorTxtDataChangedCallback(mVendorTxtData);
+        vendorTxtDataChangedCallback(vendorTxtData);
     }
 }
 
@@ -434,7 +430,6 @@ void BorderAgent::PublishMeshCoPService(void)
     // doesn't have to send requests to the dummy port when border agent is not running.
     port = mBaIsActive ? mMeshCoPUdpPort : kBorderAgentServiceDummyPort;
 
-    txtData.insert(txtData.end(), mVendorTxtData.begin(), mVendorTxtData.end());
     txtData.insert(txtData.end(), mOtTxtData.begin(), mOtTxtData.end());
 
     mPublisher.PublishService(/* aHostName */ "", mServiceInstanceName, kBorderAgentServiceType,
