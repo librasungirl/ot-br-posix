@@ -226,6 +226,7 @@ private:
     std::string mVendorName;
     std::string mProductName;
 
+    TxtData                      mVendorTxtData; // Encoded vendor-specific TXT data.
     VendorTxtDataChangedCallback vendorTxtDataChangedCallback;
 
 #if OTBR_ENABLE_BORDER_AGENT_MESHCOP_SERVICE

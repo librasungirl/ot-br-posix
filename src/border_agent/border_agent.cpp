@@ -290,7 +290,7 @@ exit:
 void BorderAgent::HandleBorderAgentMeshCoPServiceChanged(bool aIsActive, uint16_t aPort, const TxtData &aOtTxtData)
 {
     std::string vendorName;
-    std::string productName;
+    std::string modelName;
     bool        runtimeUpdate = false;
 
     if (aIsActive != mBaIsActive || aPort != mMeshCoPUdpPort)
@@ -320,7 +320,7 @@ void BorderAgent::HandleBorderAgentMeshCoPServiceChanged(bool aIsActive, uint16_
 
             if (txtEntry.mKey == "mn")
             {
-                productName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
+                modelName.assign(reinterpret_cast<const char *>(txtEntry.mValue.data()), txtEntry.mValue.size());
                 runtimeUpdate = true;
             }
 
@@ -336,7 +336,7 @@ void BorderAgent::HandleBorderAgentMeshCoPServiceChanged(bool aIsActive, uint16_
 
         if (runtimeUpdate)
         {
-            mBaseServiceInstanceName = vendorName + " " + productName;
+            mBaseServiceInstanceName = vendorName + " " + modelName;
         }
     }
 
@@ -349,7 +349,6 @@ exit:
 void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
 {
     Mdns::Publisher::TxtList txtList;
-    TxtData                  vendorTxtData; // Encoded vendor-specific TXT data.
 
     if (!mVendorOui.empty())
     {
@@ -389,11 +388,11 @@ void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
         }
     }
 
-    vendorTxtData.clear();
+    mVendorTxtData.clear();
 
     if (!txtList.empty())
     {
-        otbrError error = Mdns::Publisher::EncodeTxtData(txtList, vendorTxtData);
+        otbrError error = Mdns::Publisher::EncodeTxtData(txtList, mVendorTxtData);
 
         assert(error == OTBR_ERROR_NONE);
         OTBR_UNUSED_VARIABLE(error);
@@ -401,7 +400,7 @@ void BorderAgent::EncodeVendorTxtData(const VendorTxtEntries &aVendorEntries)
 
     if (vendorTxtDataChangedCallback != nullptr)
     {
-        vendorTxtDataChangedCallback(vendorTxtData);
+        vendorTxtDataChangedCallback(mVendorTxtData);
     }
 }
 
@@ -411,7 +410,7 @@ void BorderAgent::SetVendorTxtDataChangedCallback(VendorTxtDataChangedCallback a
 
     if (vendorTxtDataChangedCallback != nullptr)
     {
-        vendorTxtDataChangedCallback(vendorTxtData);
+        vendorTxtDataChangedCallback(mVendorTxtData);
     }
 }
 
